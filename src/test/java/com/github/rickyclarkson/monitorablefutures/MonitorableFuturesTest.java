@@ -2,65 +2,47 @@ package com.github.rickyclarkson.monitorablefutures;
 
 import org.junit.Test;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static com.github.rickyclarkson.monitorablefutures.MonitorableExecutorService.monitorable;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class MonitorableFuturesTest {
     @Test
-    public void monitoringWithStandardFramework() throws InterruptedException {
-        ExecutorService service = Executors.newSingleThreadExecutor();
-        class Sleeping implements Runnable {
-            final BlockingQueue<Integer> progress = new ArrayBlockingQueue<Integer>(2);
-            @Override
-            public void run() {
-                for (int a = 0; a < 3; a++) {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                    progress.add(a);
-                }
-            }
-        }
-        Sleeping sleeping = new Sleeping();
-        Future<?> future = service.submit(sleeping);
-        while (!future.isDone()) {
-            Thread.sleep(100);
-            final Integer integer = sleeping.progress.poll(10, TimeUnit.MILLISECONDS);
-            if (integer != null)
-                System.out.println("Progress: " + integer);
-        }
-    }
-
-    @Test
     public void withMonitorable() throws InterruptedException {
         MonitorableExecutorService service = monitorable(Executors.newSingleThreadExecutor());
-        class Sleeping extends MonitorableRunnable<Integer> {
+        class Count extends MonitorableRunnable<Integer> {
             @Override
             public void run() {
                 for (int a = 0; a < 3; a++) {
                     try {
-                        Thread.sleep(1000);
+                        if (!updates().offer(a, 1, TimeUnit.SECONDS))
+                            new IllegalStateException("Couldn't offer " + a + " to the BlockingQueue after waiting for 1 second.").printStackTrace();
                     } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
+                        e.printStackTrace();
                     }
-                    updates().add(a);
+                    System.out.println("Added " + a);
                 }
             }
         }
-        MonitorableFuture<?, Integer> future = service.submit(new Sleeping());
-        while (!future.isDone()) {
-            Thread.sleep(100);
+        MonitorableFuture<?, Integer> future = service.submit(new Count());
+
+        for (;;) {
             final Integer integer = future.updates().poll(10, TimeUnit.MILLISECONDS);
             if (integer != null)
                 System.out.println("Progress: " + integer);
+            if (integer == null)
+                continue;
+
+            if (integer == 2) {
+                assertTrue(future.isDone());
+                return;
+            }
+            if (integer > 2) {
+                fail("The test case is faulty if the value is >2");
+            }
         }
     }
 }
