@@ -9,7 +9,7 @@ import java.util.concurrent.TimeoutException;
 public class MonitorableExecutorService {
     private final ExecutorService executorService;
 
-    public MonitorableExecutorService(ExecutorService executorService) {
+    private MonitorableExecutorService(ExecutorService executorService) {
         this.executorService = executorService;
     }
 
@@ -17,9 +17,9 @@ public class MonitorableExecutorService {
         return new MonitorableExecutorService(executorService);
     }
 
-    public <A> MonitorableFuture<?, A> submit(MonitorableRunnable<A> command) {
+    public <A> MonitorableFuture<Void, A> submit(MonitorableRunnable<A> command) {
         final Future<?> wrapped = executorService.submit(command);
-        return new MonitorableFuture<Object, A>(new Future<Object>() {
+        return new MonitorableFuture<Void, A>(new Future<Void>() {
             @Override
             public boolean cancel(boolean mayInterruptIfRunning) {
                 return wrapped.cancel(mayInterruptIfRunning);
@@ -36,13 +36,15 @@ public class MonitorableExecutorService {
             }
 
             @Override
-            public Object get() throws InterruptedException, ExecutionException {
-                return wrapped.get();
+            public Void get() throws InterruptedException, ExecutionException {
+                wrapped.get();
+                return null;
             }
 
             @Override
-            public Object get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-                return wrapped.get(timeout, unit);
+            public Void get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+                wrapped.get(timeout, unit);
+                return null;
             }
         }, command.updates());
     }
