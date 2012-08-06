@@ -8,12 +8,13 @@
     </parent>
 	<groupId>com.github.rickyclarkson</groupId>
 	<artifactId>monitorablefutures</artifactId>
-	<version>1.2-SNAPSHOT</version>
+	<version>1.2</version>
     <scm>
         <connection>scm:git:ssh://github.com/rickyclarkson/monitorablefutures.git</connection>
         <developerConnection>scm:git:ssh://github.com/rickyclarkson/monitorablefutures.git</developerConnection>
         <url>http://github.com/rickyclarkson/monitorablefutures</url>
-    </scm>
+      <tag>monitorablefutures-1.2</tag>
+  </scm>
     <dependencies>
 		<dependency>
 			<groupId>junit</groupId>
