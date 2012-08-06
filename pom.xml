@@ -9,12 +9,30 @@
 	<groupId>com.github.rickyclarkson</groupId>
 	<artifactId>monitorablefutures</artifactId>
 	<version>1.4-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <name>monitorablefutures</name>
+    <description>Futures as in java.util.concurrent, but with the ability to report progress.</description>
+    <url>http://github.com/rickyclarkson/monitorablefutures</url>
+    <licenses>
+        <license>
+            <name>BSD-2-Clause</name>
+            <url>BSD-2-Clause.txt</url>
+            <distribution>repo</distribution>
+            <comments>A business-friendly OSS license</comments>
+        </license>
+    </licenses>
     <scm>
         <connection>scm:git:ssh://git@github.com/rickyclarkson/monitorablefutures.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/rickyclarkson/monitorablefutures.git</developerConnection>
         <url>http://github.com/rickyclarkson/monitorablefutures</url>
     <tag>HEAD</tag>
   </scm>
+    <developers>
+        <developer>
+            <name>Ricky Clarkson</name>
+            <email>ricky.clarkson@gmail.com</email>
+        </developer>
+    </developers>
     <dependencies>
 		<dependency>
 			<groupId>junit</groupId>
