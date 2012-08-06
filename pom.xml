@@ -8,7 +8,7 @@
     </parent>
 	<groupId>com.github.rickyclarkson</groupId>
 	<artifactId>monitorablefutures</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.0</version>
     <scm>
         <connection>scm:git:ssh://github.com/rickyclarkson/monitorablefutures.git</connection>
         <developerConnection>scm:git:ssh://github.com/rickyclarkson/monitorablefutures.git</developerConnection>

@@ -37,6 +37,7 @@ public class MonitorableFuturesTest {
                 continue;
 
             if (integer == 2) {
+                Thread.sleep(500);
                 assertTrue(future.isDone());
                 return;
             }
