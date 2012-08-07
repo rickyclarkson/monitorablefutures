@@ -2,8 +2,14 @@ package com.github.rickyclarkson.monitorablefutures;
 
 import org.junit.Test;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -53,7 +59,8 @@ public class MonitorableFuturesTest {
 
     @Test
     public void delegationHappens() {
-        MonitorableFuture<Void, Void> sleepAWhile = MonitorableExecutorService.monitorable(Executors.newFixedThreadPool(1)).submit(new MonitorableRunnable<Void>() {
+        final MonitorableExecutorService monitorableExecutorService = MonitorableExecutorService.monitorable(Executors.newFixedThreadPool(1));
+        MonitorableFuture<Void, Void> sleepAWhile = monitorableExecutorService.submit(new MonitorableRunnable<Void>() {
             @Override
             public void run() {
                 try {
@@ -67,6 +74,83 @@ public class MonitorableFuturesTest {
         assertFalse(sleepAWhile.isDone());
         assertTrue(sleepAWhile.cancel(true));
         assertTrue(sleepAWhile.isCancelled());
+
+        ExecutorService doNow = new ExecutorService() {
+            @Override
+            public void shutdown() {
+            }
+
+            @Override
+            public List<Runnable> shutdownNow() {
+                return Collections.emptyList();
+            }
+
+            @Override
+            public boolean isShutdown() {
+                return false;
+            }
+
+            @Override
+            public boolean isTerminated() {
+                return false;
+            }
+
+            @Override
+            public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
+                return false;
+            }
+
+            @Override
+            public <T> Future<T> submit(Callable<T> task) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public <T> Future<T> submit(Runnable task, T result) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public Future<?> submit(Runnable task) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public void execute(Runnable command) {
+                command.run();
+            }
+        };
+
+        final boolean[] pass = {false};
+
+        monitorable(doNow).execute(new Runnable() {
+            @Override
+            public void run() {
+                pass[0] = true;
+            }
+        });
+
+        assertTrue(pass[0]);
     }
 
     @Test
