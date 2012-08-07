@@ -65,9 +65,8 @@ public class MonitorableFuturesTest {
         });
 
         assertFalse(sleepAWhile.isDone());
-        assertFalse(sleepAWhile.future().isDone());
-        assertTrue(sleepAWhile.future().cancel(true));
-        assertTrue(sleepAWhile.future().isCancelled());
+        assertTrue(sleepAWhile.cancel(true));
+        assertTrue(sleepAWhile.isCancelled());
     }
 
     @Test
@@ -78,7 +77,7 @@ public class MonitorableFuturesTest {
             }
         });
 
-        assertNull(future.future().get());
-        assertNull(future.future().get(1, TimeUnit.SECONDS));
+        assertNull(future.get());
+        assertNull(future.get(1, TimeUnit.SECONDS));
     }
 }
