@@ -2,10 +2,14 @@ package com.github.rickyclarkson.monitorablefutures;
 
 import org.junit.Test;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static com.github.rickyclarkson.monitorablefutures.MonitorableExecutorService.monitorable;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -45,5 +49,36 @@ public class MonitorableFuturesTest {
                 fail("The test case is faulty if the value is >2");
             }
         }
+    }
+
+    @Test
+    public void delegationHappens() {
+        MonitorableFuture<Void, Void> sleepAWhile = MonitorableExecutorService.monitorable(Executors.newFixedThreadPool(1)).submit(new MonitorableRunnable<Void>() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(100000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
+        assertFalse(sleepAWhile.isDone());
+        assertFalse(sleepAWhile.future().isDone());
+        assertTrue(sleepAWhile.future().cancel(true));
+        assertTrue(sleepAWhile.future().isCancelled());
+    }
+
+    @Test
+    public void getStillWorks() throws ExecutionException, InterruptedException, TimeoutException {
+        MonitorableFuture<Void, Void> future = MonitorableExecutorService.monitorable(Executors.newFixedThreadPool(1)).submit(new MonitorableRunnable<Void>() {
+            @Override
+            public void run() {
+            }
+        });
+
+        assertNull(future.future().get());
+        assertNull(future.future().get(1, TimeUnit.SECONDS));
     }
 }
