@@ -23,21 +23,22 @@ public class MonitorableFuturesTest {
     @Test
     public void withMonitorable() throws InterruptedException {
         MonitorableExecutorService service = monitorable(Executors.newSingleThreadExecutor());
-        class Count extends MonitorableRunnable<Integer> {
+        class Count extends Monitorable<Integer> {
             @Override
-            public void run() {
+            public Integer call() {
                 for (int a = 0; a < 3; a++) {
                     try {
-                        if (!updates().offer(a, 1, TimeUnit.SECONDS))
+                        if (!updates.offer(a, 1, TimeUnit.SECONDS))
                             new IllegalStateException("Couldn't offer " + a + " to the BlockingQueue after waiting for 1 second.").printStackTrace();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                     System.out.println("Added " + a);
                 }
+                return 3;
             }
         }
-        MonitorableFuture<?, Integer> future = service.submit(new Count());
+        MonitorableFuture<Integer> future = service.submit(new Count());
 
         for (;;) {
             final Integer integer = future.updates().poll(10, TimeUnit.MILLISECONDS);
@@ -60,14 +61,15 @@ public class MonitorableFuturesTest {
     @Test
     public void delegationHappens() {
         final MonitorableExecutorService monitorableExecutorService = MonitorableExecutorService.monitorable(Executors.newFixedThreadPool(1));
-        MonitorableFuture<Void, Void> sleepAWhile = monitorableExecutorService.submit(new MonitorableRunnable<Void>() {
+        MonitorableFuture<Void> sleepAWhile = monitorableExecutorService.submit(new Monitorable<Void>() {
             @Override
-            public void run() {
+            public Void call() {
                 try {
                     Thread.sleep(100000);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
+                return null;
             }
         });
 
@@ -155,9 +157,10 @@ public class MonitorableFuturesTest {
 
     @Test
     public void getStillWorks() throws ExecutionException, InterruptedException, TimeoutException {
-        MonitorableFuture<Void, Void> future = MonitorableExecutorService.monitorable(Executors.newFixedThreadPool(1)).submit(new MonitorableRunnable<Void>() {
+        MonitorableFuture<Void> future = MonitorableExecutorService.monitorable(Executors.newFixedThreadPool(1)).submit(new Monitorable<Void>() {
             @Override
-            public void run() {
+            public Void call() {
+                return null;
             }
         });
 

@@ -6,16 +6,16 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class MonitorableFuture<A, B> {
+public class MonitorableFuture<A> {
     private final Future<A> future;
-    private final BlockingQueue<B> updates;
+    private final BlockingQueue<A> updates;
 
-    public MonitorableFuture(Future<A> future, BlockingQueue<B> updates) {
+    public MonitorableFuture(Future<A> future, BlockingQueue<A> updates) {
         this.future = future;
         this.updates = updates;
     }
 
-    public BlockingQueue<B> updates() {
+    public BlockingQueue<A> updates() {
         return updates;
     }
 
