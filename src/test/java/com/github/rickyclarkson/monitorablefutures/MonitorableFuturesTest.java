@@ -25,7 +25,7 @@ public class MonitorableFuturesTest {
         MonitorableExecutorService service = monitorable(Executors.newSingleThreadExecutor());
         class Count extends Monitorable<Integer> {
             @Override
-            public Integer call() {
+            public Integer call(MonitorableExecutorService executorService) {
                 for (int a = 0; a < 3; a++) {
                     try {
                         if (!updates.offer(a, 1, TimeUnit.SECONDS))
@@ -63,7 +63,7 @@ public class MonitorableFuturesTest {
         final MonitorableExecutorService monitorableExecutorService = MonitorableExecutorService.monitorable(Executors.newFixedThreadPool(1));
         MonitorableFuture<Void> sleepAWhile = monitorableExecutorService.submit(new Monitorable<Void>() {
             @Override
-            public Void call() {
+            public Void call(MonitorableExecutorService executorService) {
                 try {
                     Thread.sleep(100000);
                 } catch (InterruptedException e) {
@@ -159,7 +159,7 @@ public class MonitorableFuturesTest {
     public void getStillWorks() throws ExecutionException, InterruptedException, TimeoutException {
         MonitorableFuture<Void> future = MonitorableExecutorService.monitorable(Executors.newFixedThreadPool(1)).submit(new Monitorable<Void>() {
             @Override
-            public Void call() {
+            public Void call(MonitorableExecutorService executorService) {
                 return null;
             }
         });
